@@ -252,4 +252,17 @@ class SelfPlay:
 
 
 if __name__ == '__main__':
-    command_line_parser()
+    # command_line_parser()
+    # Test for custom dqn
+    render = True
+    num_episodes = 1
+    use_montecarlo = False
+    funds_plot = True
+    stack = 500
+    runner = SelfPlay(render=render, num_episodes=num_episodes,
+                      use_cpp_montecarlo=use_montecarlo,
+                      funds_plot=funds_plot,
+                      stack=int(stack))
+    runner.dqn_train_custom_q1()
+
+

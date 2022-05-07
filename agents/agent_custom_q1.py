@@ -39,10 +39,11 @@ class Player:
 
     def action(self, action_space, observation, info):  # pylint: disable=no-self-use,unused-argument
         """Mandatory method that calculates the move based on the observation array and the action space."""
-        _ = (observation, info)  # not using the observation for random decision
+        import json
+        env, inf = (observation, info)  # not using the observation for random decision
         action = None
 
-        # decide if explore or explot
+        # decide if explore or exploit
 
         # forward
 
