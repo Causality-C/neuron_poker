@@ -8,6 +8,7 @@ Usage:
   main.py selfplay equity_improvement --improvement_rounds=<> [options]
   main.py selfplay dqn_train [options]
   main.py selfplay dqn_play [options]
+  main.py selfplay vs_bots [options]
   main.py learn_table_scraping [options]
 
 options:
@@ -80,6 +81,9 @@ def command_line_parser():
         elif args['dqn_play']:
             runner.dqn_play_keras_rl(model_name)
 
+        # Play Against Bots
+        elif args['vs_bots']:
+            runner.random_key_press_agents()
 
     else:
         raise RuntimeError("Argument not yet implemented")
@@ -105,6 +109,21 @@ class SelfPlay:
         env_name = 'neuron_poker-v0'
         num_of_plrs = 2
         self.env = gym.make(env_name, initial_stacks=self.stack, render=self.render)
+        for _ in range(num_of_plrs):
+            player = RandomPlayer()
+            self.env.add_player(player)
+
+        self.env.reset()
+
+    def random_key_press_agents(self):
+        from agents.agent_random import Player as RandomPlayer
+        from agents.agent_keypress import Player as KeyPressAgent
+        env_name = 'neuron_poker-v0'
+        num_of_plrs = 2
+        self.env = gym.make(env_name, initial_stacks=self.stack, render=self.render)
+        # Yourself
+        self.env.add_player(KeyPressAgent())
+        # Bots
         for _ in range(num_of_plrs):
             player = RandomPlayer()
             self.env.add_player(player)
@@ -252,17 +271,17 @@ class SelfPlay:
 
 
 if __name__ == '__main__':
-    # command_line_parser()
-    # Test for custom dqn
-    render = True
-    num_episodes = 1
-    use_montecarlo = False
-    funds_plot = True
-    stack = 500
-    runner = SelfPlay(render=render, num_episodes=num_episodes,
-                      use_cpp_montecarlo=use_montecarlo,
-                      funds_plot=funds_plot,
-                      stack=int(stack))
-    runner.dqn_train_custom_q1()
+    command_line_parser()
+    # # Test for custom dqn
+    # render = True
+    # num_episodes = 1
+    # use_montecarlo = False
+    # funds_plot = True
+    # stack = 500
+    # runner = SelfPlay(render=render, num_episodes=num_episodes,
+    #                   use_cpp_montecarlo=use_montecarlo,
+    #                   funds_plot=funds_plot,
+    #                   stack=int(stack))
+    # runner.dqn_train_custom_q1()
 
 
