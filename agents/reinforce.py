@@ -57,7 +57,7 @@ class PiApproximationWithNN():
 
     def __call__(self, legal_actions, s) -> int:
         self.model.eval()
-        action_prob = self.model(torch.from_numpy(s).float()).detach().numpy()
+        action_prob = np.nan_to_num(self.model(torch.from_numpy(s).float()).detach().numpy())
         # Fix for Duplicate Actions bug
         legal_actions = list(set(legal_actions))
 

@@ -217,7 +217,7 @@ class SelfPlay:
         # env.add_player(EquityPlayer(name='equity/20/30', min_call_equity=.2, min_bet_equity=.3))
         # env.add_player(RandomPlayer())
         env.add_player(RandomPlayer())
-        # env.add_player(RandomPlayer())
+        env.add_player(RandomPlayer())
         env.add_player(PlayerShell(name='reinforce', stack_size=self.stack))  # shell is used for callback to keras rl
 
         env.reset()

@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+from matplotlib import pyplot as plt
 
 from agents.reinforce import REINFORCE, PiApproximationWithNN, Baseline, VApproximationWithNN
 
@@ -45,4 +46,13 @@ class Player:
 
     def reinforce_train(self):
         gamma = 1.
-        print(REINFORCE(self.env, gamma, 40, self.pi, self.B))
+        training_progress = REINFORCE(self.env, gamma, 1000, self.pi, self.B)
+        sums = [0 for i in range(len(training_progress))]
+        s = 0
+        for i, val in enumerate(training_progress):
+            s += val
+            sums[i] = s
+
+        fig, ax = plt.subplots()
+        ax.plot(sums)
+        plt.show()
