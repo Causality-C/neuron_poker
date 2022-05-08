@@ -10,6 +10,7 @@ Usage:
   main.py selfplay dqn_play [options]
   main.py selfplay vs_bots [options]
   main.py learn_table_scraping [options]
+  main.py selfplay reinforce [options]
 
 options:
   -h --help                 Show this screen.
@@ -84,6 +85,9 @@ def command_line_parser():
         # Play Against Bots
         elif args['vs_bots']:
             runner.random_key_press_agents()
+
+        elif args['reinforce']:
+            runner.reinforce()
 
     else:
         raise RuntimeError("Argument not yet implemented")
@@ -198,10 +202,10 @@ class SelfPlay:
                 betting[i] = np.mean([betting[i], betting[best_player]])
                 self.log.info(f"New betting for player {i} is {betting[i]}")
 
-    def reinforce(self, model_name):
+    def reinforce(self):
         """Implementation of kreras-rl deep q learing."""
         from agents.agent_consider_equity import Player as EquityPlayer
-        from agents.reinforce import Player as ReinforcePlayer
+        from agents.agent_reinforce import Player as ReinforcePlayer
         from agents.agent_random import Player as RandomPlayer
         env_name = 'neuron_poker-v0'
         env = gym.make(env_name, initial_stacks=self.stack, funds_plot=self.funds_plot, render=self.render,
@@ -209,18 +213,19 @@ class SelfPlay:
 
         np.random.seed(123)
         env.seed(123)
-        env.add_player(EquityPlayer(name='equity/50/70', min_call_equity=.5, min_bet_equity=.7))
-        env.add_player(EquityPlayer(name='equity/20/30', min_call_equity=.2, min_bet_equity=.3))
+        # env.add_player(EquityPlayer(name='equity/50/70', min_call_equity=.5, min_bet_equity=.7))
+        # env.add_player(EquityPlayer(name='equity/20/30', min_call_equity=.2, min_bet_equity=.3))
+        # env.add_player(RandomPlayer())
         env.add_player(RandomPlayer())
-        env.add_player(RandomPlayer())
-        env.add_player(RandomPlayer())
+        # env.add_player(RandomPlayer())
         env.add_player(PlayerShell(name='reinforce', stack_size=self.stack))  # shell is used for callback to keras rl
 
         env.reset()
 
         reinforce = ReinforcePlayer()
         reinforce.initiate_agent(env)
-        dqn.train(env_name=model_name)
+        # reinforce.reinforce_train(env_name=model_name)
+        reinforce.reinforce_train()
 
     def dqn_train_keras_rl(self, model_name):
         """Implementation of kreras-rl deep q learing."""

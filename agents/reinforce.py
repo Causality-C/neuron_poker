@@ -1,7 +1,9 @@
+from typing import Iterable
+import numpy as np
+
 import torch
 from torch import nn
-from gym_env.env import Action
-import numpy as np
+
 class NeuralNetwork(nn.Module):
     def __init__(self, state_dims, num_actions=0):
         super(NeuralNetwork, self).__init__()
@@ -53,18 +55,27 @@ class PiApproximationWithNN():
             # tf.gather_nd(pi,tf.stack([tf.range(tf.shape(a_t)[0]),a_t],axis=1)),
         # assuming len(pi) == len(a_t) == batch_size
 
-    def __call__(self, s) -> int:
+    def __call__(self, legal_actions, s) -> int:
         self.model.eval()
         action_prob = self.model(torch.from_numpy(s).float()).detach().numpy()
-        choice = np.random.rand()
-        current_prob = 0
-        for a, probability in enumerate(action_prob):
-            current_prob += probability
-            if choice < current_prob:
-                return a
+        # Fix for Duplicate Actions bug
+        legal_actions = list(set(legal_actions))
 
+        # Sum up legal action probabilities
+        legal_actions_prob = 0
+        for action in legal_actions:
+            legal_actions_prob += action_prob[action.value]
 
-        return action_prob.size - 1
+        legal_probs = [action_prob[enum.value] for enum in legal_actions] / legal_actions_prob
+        return legal_actions[np.random.choice(len(legal_actions), p=legal_probs)].value
+        # choice = np.random.rand()
+        # current_prob = 0
+        # for a, probability in enumerate(set(legal_actions)):
+        #     current_prob += probability/legal_actions_prob
+        #     if choice < current_prob:
+        #         return set(legal_actions)[a]
+        #
+        # return action_prob.size - 1
 
     def my_loss(self, output, target, action):
         # Find the expectation of the return times the gradient of the log policy
@@ -132,12 +143,13 @@ class VApproximationWithNN(Baseline):
         loss.backward()
         self.optimizer.step()
 
+
 def REINFORCE(
     env, #open-ai environment
     gamma:float,
     num_episodes:int,
     pi:PiApproximationWithNN,
-    V:Baseline):
+    V:Baseline) -> Iterable[float]:
     """
     implement REINFORCE algorithm with and without baseline.
 
@@ -157,7 +169,7 @@ def REINFORCE(
         action_list = []
         reward_list = []
         s = env.reset()
-        a = pi.__call__(s)
+        a = pi.__call__(env.legal_moves, s)
 
         # Generate an episode
         while not done:
@@ -166,7 +178,7 @@ def REINFORCE(
             action_list.append(a)
             reward_list.append(r)
             s = ns
-            a = pi.__call__(s)
+            a = pi.__call__(env.legal_moves,s)
 
         for t in range(len(state_list)):
             G = 0
@@ -179,56 +191,5 @@ def REINFORCE(
             pi.update(s, a, gamma ** t, error)
             if t == 0:
                 G_0[episodes] = G
-
-
-
     return G_0
 
-class Player:
-    """Mandatory class with the player methods"""
-
-    def __init__(self, name='reinforce'):
-        """Initiaization of an agent"""
-        self.equity_alive = 0
-        self.actions = []
-        self.last_action_in_stage = ''
-        self.temp_stack = []
-        self.name = name
-        self.autoplay = True
-        self.model = None
-        self.action_space = {Action.FOLD, Action.CHECK, Action.CALL, Action.RAISE_POT, Action.RAISE_HALF_POT,
-                                    Action.RAISE_2POT}
-
-
-    def initiate_agent(self, env):
-        """initiate a deep Q agent"""
-        gamma = 1.
-        alpha = 3e-4
-        baseline = False
-
-
-        # Initialize Neural Network
-        pi = PiApproximationWithNN(
-            env.observation_space,
-            env.action_space.n,
-            alpha)
-
-        if baseline:
-            B = VApproximationWithNN(
-                env.observation_space,
-                alpha)
-        else:
-            B = Baseline(0.)
-
-        print(REINFORCE(env, gamma, 1000, pi, B))
-    
-    def action(self, action_space, observation, info):  # pylint: disable=no-self-use
-        """Mandatory method that calculates the move based on the observation array and the action space."""
-        _ = observation  # not using the observation for random decision
-        _ = info
-
-        self.model.eval()
-        prediction = self.model(torch.tensor(info).float())
-        probs = np.array(prediction.detach().numpy())
-        action = np.random.choice(len(self.action_space),p=probs)
-        return action
