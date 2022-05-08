@@ -202,7 +202,7 @@ class SelfPlay:
                 betting[i] = np.mean([betting[i], betting[best_player]])
                 self.log.info(f"New betting for player {i} is {betting[i]}")
 
-    def reinforce(self):
+    def reinforce(self, model_name):
         """Implementation of kreras-rl deep q learing."""
         from agents.agent_consider_equity import Player as EquityPlayer
         from agents.agent_reinforce import Player as ReinforcePlayer
@@ -224,8 +224,7 @@ class SelfPlay:
 
         reinforce = ReinforcePlayer()
         reinforce.initiate_agent(env)
-        # reinforce.reinforce_train(env_name=model_name)
-        reinforce.reinforce_train()
+        reinforce.reinforce_train(env_name=model_name)
 
     def dqn_train_keras_rl(self, model_name):
         """Implementation of kreras-rl deep q learing."""

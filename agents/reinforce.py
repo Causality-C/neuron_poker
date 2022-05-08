@@ -87,6 +87,12 @@ class PiApproximationWithNN():
         loss = torch.neg(torch.mul(torch.log(output[action]), target))
         return loss
 
+    def get_model(self):
+        return self.model
+
+    def get_optimizer(self):
+        return self.optimizer
+
 
     def update(self, s, a, gamma_t, delta):
         """
@@ -142,6 +148,12 @@ class VApproximationWithNN(Baseline):
         loss = self.loss_function(output, torch.tensor(G).float())
         loss.backward()
         self.optimizer.step()
+
+    def get_model(self):
+        return self.model
+
+    def get_optimizer(self):
+        return self.optimizer
 
 
 def REINFORCE(

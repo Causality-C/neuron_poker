@@ -1,8 +1,9 @@
 import sys
 import numpy as np
+import torch
 from matplotlib import pyplot as plt
 
-from agents.reinforce import REINFORCE, PiApproximationWithNN, Baseline, VApproximationWithNN
+from agents.reinforce import REINFORCE, PiApproximationWithNN, Baseline, VApproximationWithNN, NeuralNetwork
 
 class Player:
     """Mandatory class with the player methods"""
@@ -23,7 +24,7 @@ class Player:
         self.B = None
 
         if load_model:
-            self.load(load_model)
+            self.reinforce_load(load_model)
 
     def initiate_agent(self, env):
         alpha = 3e-4
@@ -44,9 +45,21 @@ class Player:
             self.B = Baseline(0.)
 
 
-    def reinforce_train(self):
+    def reinforce_train(self, env_name):
         gamma = 1.
+
+        # List the amount won/loss during each poker game
         training_progress = REINFORCE(self.env, gamma, 1000, self.pi, self.B)
+
+        # Save the generated model
+        torch.save({
+            'pi_state_dict' : self.pi.get_model.get_state_dict(),
+            'value_state_dict' : self.B.get_model.get_state_dict(),
+            'pi_optimizer_dict' : self.pi.get_optimizer().get_state_dict(),
+            'value_optimizer_dict' : self.B.get_optimizer().get_state_dict()
+        }, env_name)
+
+        # Plot the total amount of winnings/losses from 1000 episodes
         sums = [0 for i in range(len(training_progress))]
         s = 0
         for i, val in enumerate(training_progress):
@@ -56,3 +69,16 @@ class Player:
         fig, ax = plt.subplots()
         ax.plot(sums)
         plt.show()
+
+    def reinforce_load(self, model_name):
+
+        # Loads the model
+        checkpoint = torch.load(model_name)
+        self.pi.get_model().load_state_dict('pi_state_dict')
+        self.B.get_model().load_state_dict(checkpoint['value_state_dict'])
+        self.pi.get_optimizer().load_state_dict('pi_optimizer_dict')
+        self.B.get_optimizer().load_state_dict(checkpoint['value_optimizer_dict'])
+
+        # Set mode to evaluation
+        self.pi.get_model().eval()
+        self.B.get_model().eval()
