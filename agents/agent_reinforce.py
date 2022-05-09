@@ -2,8 +2,12 @@ import sys
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
+import logging
 
 from agents.reinforce import REINFORCE, PiApproximationWithNN, Baseline, VApproximationWithNN, NeuralNetwork
+from agents.reinforcetwo import VApproximationWithNNImproved
+
+logger = logging.getLogger(__name__)
 
 class Player:
     """Mandatory class with the player methods"""
@@ -24,7 +28,7 @@ class Player:
         self.B = None
 
         if load_model:
-            self.reinforce_load(load_model)
+            self.reinforce_load(load_model, env)
 
     def initiate_agent(self, env):
         alpha = 3e-4
@@ -37,26 +41,27 @@ class Player:
             env.action_space.n,
             alpha)
 
-        if baseline:
-            self.B = VApproximationWithNN(
-                env.observation_space[0],
-                alpha)
-        else:
-            self.B = Baseline(0.)
+        self.B = VApproximationWithNN(
+            env.observation_space[0],
+            alpha)
+
+        self.C = VApproximationWithNNImproved(
+            env.observation_space[0],
+            alpha
+        )
 
 
     def reinforce_train(self, env_name):
         gamma = 1.
-
         # List the amount won/loss during each poker game
-        training_progress = REINFORCE(self.env, gamma, 1000, self.pi, self.B)
+        training_progress = REINFORCE(self.env, gamma, 100, self.pi, self.C)
 
         # Save the generated model
         torch.save({
-            'pi_state_dict' : self.pi.get_model.get_state_dict(),
-            'value_state_dict' : self.B.get_model.get_state_dict(),
-            'pi_optimizer_dict' : self.pi.get_optimizer().get_state_dict(),
-            'value_optimizer_dict' : self.B.get_optimizer().get_state_dict()
+            'pi_state_dict' : self.pi.get_model().state_dict(),
+            'value_state_dict' : self.B.get_model().state_dict(),
+            'pi_optimizer_dict' : self.pi.get_optimizer().state_dict(),
+            'value_optimizer_dict' : self.B.get_optimizer().state_dict()
         }, env_name)
 
         # Plot the total amount of winnings/losses from 1000 episodes
@@ -70,7 +75,9 @@ class Player:
         ax.plot(sums)
         plt.show()
 
-    def reinforce_load(self, model_name):
+    def reinforce_load(self, model_name, env):
+        # Initialize the agent
+        self.initiate_agent(env)
 
         # Loads the model
         checkpoint = torch.load(model_name)

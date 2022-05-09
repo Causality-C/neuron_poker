@@ -47,7 +47,7 @@ def command_line_parser():
     else:
         print("Using default log file")
         logfile = 'default'
-    model_name = args['--name'] if args['--name'] else 'dqn1'
+    model_name = args['--name'] if args['--name'] else 'dqn1.pth'
     screenloglevel = logging.INFO if not args['--screenloglevel'] else \
         getattr(logging, args['--screenloglevel'].upper())
     _ = get_config()
@@ -87,7 +87,8 @@ def command_line_parser():
             runner.random_key_press_agents()
 
         elif args['reinforce']:
-            runner.reinforce()
+            model_name = 'reinforce'
+            runner.reinforce(model_name)
 
     else:
         raise RuntimeError("Argument not yet implemented")
