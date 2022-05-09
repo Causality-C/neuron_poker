@@ -87,7 +87,8 @@ def command_line_parser():
             runner.random_key_press_agents()
 
         elif args['reinforce']:
-            runner.reinforce("lol")
+            model_name = 'reinforce'
+            runner.reinforce(model_name)
 
     else:
         raise RuntimeError("Argument not yet implemented")
@@ -204,30 +205,27 @@ class SelfPlay:
 
     def reinforce(self, model_name):
         """Implementation of kreras-rl deep q learing."""
+        from agents.agent_consider_equity import Player as EquityPlayer
         from agents.agent_reinforce import Player as ReinforcePlayer
         from agents.agent_random import Player as RandomPlayer
-        from agents.agent_keras_rl_dqn import Player as DQNPlayer
         env_name = 'neuron_poker-v0'
         env = gym.make(env_name, initial_stacks=self.stack, funds_plot=self.funds_plot, render=self.render,
                        use_cpp_montecarlo=self.use_cpp_montecarlo)
 
         np.random.seed(123)
         env.seed(123)
+        # env.add_player(EquityPlayer(name='equity/50/70', min_call_equity=.5, min_bet_equity=.7))
+        # env.add_player(EquityPlayer(name='equity/20/30', min_call_equity=.2, min_bet_equity=.3))
+        # env.add_player(RandomPlayer())
+        env.add_player(RandomPlayer())
         env.add_player(RandomPlayer())
         env.add_player(PlayerShell(name='reinforce', stack_size=self.stack))  # shell is used for callback to keras rl
-        env.add_player(PlayerShell(name='keras-rl', stack_size=self.stack))  # shell is used for callback to keras rl
 
         env.reset()
 
-        # Add Reinforce Agent
         reinforce = ReinforcePlayer()
         reinforce.initiate_agent(env)
-        reinforce.reinforce_train(env_name="reinforce")
-
-        # Add DQN Agent
-        dqn = DQNPlayer()
-        dqn.initiate_agent(env)
-        dqn.train(env_name='keras-rl')
+        reinforce.reinforce_train(env_name=model_name)
 
     def dqn_train_keras_rl(self, model_name):
         """Implementation of kreras-rl deep q learing."""

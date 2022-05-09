@@ -3,6 +3,9 @@ import numpy as np
 
 import torch
 from torch import nn
+import logging
+
+logger = logging.getLogger(__name__)
 
 class NeuralNetwork(nn.Module):
     def __init__(self, state_dims, num_actions=0):
@@ -65,6 +68,10 @@ class PiApproximationWithNN():
         legal_actions_prob = 0
         for action in legal_actions:
             legal_actions_prob += action_prob[action.value]
+
+        if(legal_actions_prob == 0):
+            logger.log("WARNING: Action probabilities from model are all 0")
+            return np.random.choice(list(set(legal_actions))).value
 
         legal_probs = [action_prob[enum.value] for enum in legal_actions] / legal_actions_prob
         return legal_actions[np.random.choice(len(legal_actions), p=legal_probs)].value
