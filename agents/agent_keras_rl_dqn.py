@@ -109,7 +109,7 @@ class Player:
         self.dqn.save_weights('dqn_{}_weights.h5'.format(env_name), overwrite=True)
 
         # Finally, evaluate our algorithm for 5 episodes.
-        self.dqn.test(self.env, nb_episodes=5, visualize=False)
+        self.dqn.test(self.env, nb_episodes=500, visualize=False)
 
     def load(self, env_name):
         """Load a model"""
