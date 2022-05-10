@@ -24,7 +24,7 @@ def _runner(simulation, my_cards, cards_on_table, players, expected_results, opp
                                   timeout=start_time, ghost_cards='', opponent_range=opponent_range)
         equity = simulation.equity
         total_result.append(equity * 100)
-        log.info("--- %s seconds ---" % (time.time() - start_time))
+        log.info(f"--- {time.time() - start_time} seconds ---")
 
         for keys, values in simulation.winTypesDict:
             log.info(keys + ": " + (str(np.round(values * 100, 2))))

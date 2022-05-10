@@ -9,6 +9,8 @@ Usage:
   main.py selfplay dqn_train [options]
   main.py selfplay dqn_play [options]
   main.py learn_table_scraping [options]
+  main.py selfplay reinforce_train [options]
+  main.py selfplay reinforce [options]
 
 options:
   -h --help                 Show this screen.
@@ -80,6 +82,15 @@ def command_line_parser():
         elif args['dqn_play']:
             runner.dqn_play_keras_rl(model_name)
 
+        # Reinforce Train
+        elif args['reinforce_train']:
+            model_name = 'reinforce'
+            runner.reinforce_train(model_name)
+
+        # Reinforce Play
+        elif args['reinforce']:
+            model_name = 'reinforce'
+            runner.reinforce(model_name)
 
     else:
         raise RuntimeError("Argument not yet implemented")
@@ -179,6 +190,50 @@ class SelfPlay:
                 betting[i] = np.mean([betting[i], betting[best_player]])
                 self.log.info(f"New betting for player {i} is {betting[i]}")
 
+    def reinforce_train(self, model_name):
+        """
+        Trains the REINFORCE algorithm against Random Players
+        :param model_name: file name where model weights will be saved
+        """
+
+        from agents.agent_reinforce import Player as ReinforcePlayer
+        from agents.agent_random import Player as RandomPlayer
+
+        env = gym.make('neuron_poker-v0', initial_stacks=self.stack, funds_plot=self.funds_plot, render=self.render,
+                       use_cpp_montecarlo=self.use_cpp_montecarlo)
+        np.random.seed(123)
+        env.seed(123)
+
+        env.add_player(RandomPlayer())
+        env.add_player(PlayerShell(name='reinforce', stack_size=self.stack))  # shell is used for callback to keras rl
+        env.reset()
+
+        reinforce = ReinforcePlayer()
+        reinforce.initiate_agent(env)
+        reinforce.reinforce_train(env_name=model_name)
+
+    def reinforce(self, model_name):
+        """
+        Pits the REINFORCE algorithm against Random Models
+        :param model_name: where to load the model from
+        """
+        from agents.agent_reinforce import Player as ReinforcePlayer
+        from agents.agent_random import Player as RandomPlayer
+        env_name = 'neuron_poker-v0'
+        self.env = gym.make(env_name, initial_stacks=self.stack, funds_plot=self.funds_plot, render=self.render,
+                       use_cpp_montecarlo=self.use_cpp_montecarlo)
+        np.random.seed(123)
+        self.env.seed(123)
+        self.env.add_player(RandomPlayer())
+        self.env.add_player(PlayerShell(name='reinforce', stack_size=self.stack))  # shell is used for callback to keras rl
+
+        self.env.reset()
+
+        # Load the REINFORCE Model
+        reinforce = ReinforcePlayer()
+        reinforce.reinforce_load("reinforce", self.env)
+
+
     def dqn_train_keras_rl(self, model_name):
         """Implementation of kreras-rl deep q learing."""
         from agents.agent_consider_equity import Player as EquityPlayer
@@ -192,7 +247,6 @@ class SelfPlay:
         env.seed(123)
         env.add_player(EquityPlayer(name='equity/50/70', min_call_equity=.5, min_bet_equity=.7))
         env.add_player(EquityPlayer(name='equity/20/30', min_call_equity=.2, min_bet_equity=.3))
-        env.add_player(RandomPlayer())
         env.add_player(RandomPlayer())
         env.add_player(RandomPlayer())
         env.add_player(PlayerShell(name='keras-rl', stack_size=self.stack))  # shell is used for callback to keras rl
@@ -229,11 +283,7 @@ class SelfPlay:
         from agents.agent_random import Player as RandomPlayer
         env_name = 'neuron_poker-v0'
         self.env = gym.make(env_name, initial_stacks=self.stack, render=self.render)
-        # self.env.add_player(EquityPlayer(name='equity/50/50', min_call_equity=.5, min_bet_equity=-.5))
-        # self.env.add_player(EquityPlayer(name='equity/50/80', min_call_equity=.8, min_bet_equity=-.8))
-        # self.env.add_player(EquityPlayer(name='equity/70/70', min_call_equity=.7, min_bet_equity=-.7))
         self.env.add_player(EquityPlayer(name='equity/20/30', min_call_equity=.2, min_bet_equity=-.3))
-        # self.env.add_player(RandomPlayer())
         self.env.add_player(RandomPlayer())
         self.env.add_player(RandomPlayer())
         self.env.add_player(Custom_Q1(name='Deep_Q1'))
@@ -253,3 +303,16 @@ class SelfPlay:
 
 if __name__ == '__main__':
     command_line_parser()
+    # # Test for custom dqn
+    # render = True
+    # num_episodes = 1
+    # use_montecarlo = False
+    # funds_plot = True
+    # stack = 500
+    # runner = SelfPlay(render=render, num_episodes=num_episodes,
+    #                   use_cpp_montecarlo=use_montecarlo,
+    #                   funds_plot=funds_plot,
+    #                   stack=int(stack))
+    # runner.dqn_train_custom_q1()
+
+

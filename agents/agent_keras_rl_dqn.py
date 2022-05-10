@@ -26,7 +26,7 @@ window_length = 1
 nb_max_start_steps = 1  # random action
 train_interval = 100  # train every 100 steps
 nb_steps_warmup = 50  # before training starts, should be higher than start steps
-nb_steps = 100000
+nb_steps = 10000
 memory_limit = int(nb_steps / 2)
 batch_size = 500  # items sampled from memory to train
 enable_double_dqn = False
@@ -109,7 +109,7 @@ class Player:
         self.dqn.save_weights('dqn_{}_weights.h5'.format(env_name), overwrite=True)
 
         # Finally, evaluate our algorithm for 5 episodes.
-        self.dqn.test(self.env, nb_episodes=5, visualize=False)
+        self.dqn.test(self.env, nb_episodes=50, visualize=False)
 
     def load(self, env_name):
         """Load a model"""

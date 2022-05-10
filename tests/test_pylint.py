@@ -60,11 +60,11 @@ class _WritableOutput:
 def test_pylint():
     """Test codebase for pylint errors."""
     files_to_check = get_relevant_files()
-    log.info("{} changed files detected".format(len(files_to_check)))
+    log.info(f"{len(files_to_check)} changed files detected")
     rcfile, reps = (os.path.join(CODEBASE, '.pylintrc'), files_to_check)
 
-    pylint_args = ['--rcfile={}'.format(rcfile), ]
-    log.info('applying pylint to repository {}'.format(reps))
+    pylint_args = [f'--rcfile={rcfile}', ]
+    log.info(f'applying pylint to repository {reps}')
     pylint_args += reps
 
     pylint_output = _WritableOutput()
@@ -182,7 +182,7 @@ def run_pydocstyle():
     errors_final = []
     for err in errors:
         if hasattr(err, 'code') and not any(ignore in str(err) for ignore in IGNORES):
-            sys.stdout.write('%s\n' % err)
+            sys.stdout.write(f'{err}\n')
             errors_final.append(err)
         count += 1
     return errors_final
