@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class Player:
     """Mandatory class with the player methods"""
 
-    def __init__(self, name='DQN', load_model=None, env=None):
+    def __init__(self, name='reinforce', load_model=None, env=None):
         """Initialization of an agent"""
         self.equity_alive = 0
         self.actions = []
@@ -49,7 +49,7 @@ class Player:
     def reinforce_train(self, env_name):
         gamma = 1.
         # List the amount won/loss during each poker game
-        training_progress = REINFORCE(self.env, gamma, 500, self.pi, self.B)
+        training_progress = REINFORCE(self.env, gamma, 100, self.pi, self.B)
 
         # Save the generated model
         torch.save({
@@ -76,9 +76,9 @@ class Player:
 
         # Loads the model
         checkpoint = torch.load(model_name)
-        self.pi.get_model().load_state_dict('pi_state_dict')
+        self.pi.get_model().load_state_dict(checkpoint['pi_state_dict'])
         self.B.get_model().load_state_dict(checkpoint['value_state_dict'])
-        self.pi.get_optimizer().load_state_dict('pi_optimizer_dict')
+        self.pi.get_optimizer().load_state_dict(checkpoint['pi_optimizer_dict'])
         self.B.get_optimizer().load_state_dict(checkpoint['value_optimizer_dict'])
 
         # Set mode to evaluation
