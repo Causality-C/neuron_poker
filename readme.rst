@@ -5,6 +5,7 @@ This is an environment for training neural networks to play texas
 holdem. Please try to model your own players and create a pull request
 so we can collaborate and create the best possible player.
 
+
 Usage:
 ------
 
@@ -23,6 +24,13 @@ Run:
 .. figure:: doc/table.gif
    :alt:
 
+Usage (UPDATED):
+------
+- Train the REINFORCE model with ``main.py selfplay reinforce_train``
+- Run the REINFORCE model with ``main.py selfplay reinforce``
+
+After running reinforce_train:
+|image3|
 
 Analysis of the run
 ~~~~~~~~~~~~~~~~~~~
@@ -227,3 +235,4 @@ To contribute do the following:
 .. |image0| image:: doc/pots.png
 .. |image1| image:: doc/pytest.png
 .. |image2| image:: doc/tensorboard-example.png
+.. |image3| image:: doc/REINFORCE.png
