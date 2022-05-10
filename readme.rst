@@ -21,10 +21,7 @@ Run:
 - In order to use the c++ version of the equity calculator, you will also need to install visual studio 2019 (or gcc over cygwin may work as well). To use it, use the -c option when running main.py.
 - For more advanced users: ``main.py selfplay dqn_train -c`` will start training the deep Q agent with c++ montecarlo for faster calculation
 
-.. figure:: doc/table.gif
-   :alt:
-
-Usage (UPDATED):
+Usage With REINFORCE:
 ------
 - Train the REINFORCE model with ``main.py selfplay reinforce_train``
 - Run the REINFORCE model with ``main.py selfplay reinforce``
