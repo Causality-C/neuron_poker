@@ -29,7 +29,9 @@ Usage (UPDATED):
 - Train the REINFORCE model with ``main.py selfplay reinforce_train``
 - Run the REINFORCE model with ``main.py selfplay reinforce``
 
-After running reinforce_train:
+You will need to train REINFORCE to run the REINFORCE model. The file with the weights will be found in ``reinforce``.
+
+After running reinforce_train, here is the episode to reward graph:
 |image3|
 
 Analysis of the run
